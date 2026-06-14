@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "users")
@@ -18,6 +19,15 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * UUID público exposto no EmailDto — gerado na criação do usuário.
+     */
+    @Column(nullable = false, unique = true, updatable = false, length = 36)
+    private String publicId;
+
+    /**
+     * Usado como identificador de login (pode ser o próprio e-mail).
+     */
     @Column(nullable = false, unique = true)
     private String username;
 
@@ -31,4 +41,11 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private List<Role> roles;
+
+    @PrePersist
+    public void gerarPublicId() {
+        if (this.publicId == null) {
+            this.publicId = UUID.randomUUID().toString();
+        }
+    }
 }

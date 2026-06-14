@@ -33,9 +33,17 @@ public class SecurityConfiguration {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/users/login", "/users").permitAll()
+                        // ── Endpoints públicos (sem autenticação) ──────────────────
+                        .requestMatchers(
+                                "/users/login",
+                                "/users",
+                                "/auth/request-code",   // Etapa 2
+                                "/auth/verify-code"     // Etapa 2
+                        ).permitAll()
+                        // ── Endpoints protegidos por role ──────────────────────────
                         .requestMatchers("/users/test/customer").hasRole("CUSTOMER")
                         .requestMatchers("/users/test/administrator").hasRole("ADMINISTRATOR")
+                        // ── Qualquer outra rota exige autenticação ─────────────────
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(userAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
